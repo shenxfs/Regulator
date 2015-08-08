@@ -5,16 +5,9 @@
 static const __flash int16_t regtab[15]={
 82,247,394,498,577,644,699,748,788,826,862,893,921,938,972
 };
-volatile  int16_t times;
 
 ISR(TIMER1_OVF_vect )
 {
-  times ++;
-  if(times > 7812)
-    {
-    times = 0;
-//    LED_PORT ^= _BV(LED_PIN);
-    }
   LED_PORT |= _BV(LED_PIN);
 }
 
