@@ -32,7 +32,11 @@ int main(void)
   OCR1A =  regtab[0];
   while(1)
     {
-    if((BOARD_IN & _BV(BOARD_PIN)) == _BV(BOARD_PIN))   
+#ifdef BOARDHIGH
+    if((BOARD_IN & _BV(BOARD_PIN)) == _BV(BOARD_PIN))
+#else   
+    if((BOARD_IN & _BV(BOARD_PIN)) != _BV(BOARD_PIN))
+#endif
           {
       if((KEY_IN & KEY_MASK) != KEY_MASK)
               {
