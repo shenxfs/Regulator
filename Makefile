@@ -41,8 +41,7 @@
 
 
 # MCU name
-MCU ?= atmega328p
-#MCU = atmega2560
+MCU = atmega328p
 
 
 # Processor frequency.
@@ -60,10 +59,10 @@ MCU ?= atmega328p
 #         F_CPU =  8000000
 #         F_CPU = 11059200
 #         F_CPU = 14745600
-         F_CPU = 16000000
+#         F_CPU = 16000000
 #         F_CPU = 18432000
 #         F_CPU = 20000000
-#F_CPU = 8000000
+F_CPU = 16000000
 
 
 # Output format. (can be srec, ihex, binary)
@@ -71,17 +70,17 @@ FORMAT = ihex
 
 
 # Target file name (without extension).
-TARGET = regulator
+TARGET = main
 
 
 # Object files directory
 #     To put object files in current directory, use a dot (.), do NOT make
 #     this an empty or blank macro!
-OBJDIR = obj
+OBJDIR = .
 
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = main.c  
+SRC = $(TARGET).c
 
 
 # List C++ source files here. (C dependencies are automatically generated.)
@@ -95,7 +94,7 @@ CPPSRC =
 #     Even though the DOS/Win* filesystem matches both .s and .S the same,
 #     it will preserve the spelling of the filenames, and gcc itself does
 #     care about how the name is spelled on its command-line.
-ASRC = 
+ASRC =
 
 
 # Optimization level, can be [0, 1, 2, 3, s]. 
@@ -128,9 +127,8 @@ CSTANDARD = -std=gnu99
 
 # Place -D or -U options here for C sources
 CDEFS = -DF_CPU=$(F_CPU)UL
-ifeq ($(BOARD),HIGH)
-CDEFS += -DBOARDHIGH
-endif
+
+
 # Place -D or -U options here for ASM sources
 ADEFS = -DF_CPU=$(F_CPU)
 
@@ -232,7 +230,7 @@ SCANF_LIB =
 #SCANF_LIB = $(SCANF_LIB_FLOAT)
 
 
-MATH_LIB = 
+MATH_LIB = -lm
 
 
 # List any extra directories to look for libraries here.
@@ -262,7 +260,6 @@ EXTMEMOPTS =
 #    -Map:      create map file
 #    --cref:    add cross reference to  map file
 LDFLAGS = -Wl,-Map=$(TARGET).map,--cref
-LDFLAGS += -Wl,--section-start=.eeprom=0x810002
 LDFLAGS += $(EXTMEMOPTS)
 LDFLAGS += $(patsubst %,-L%,$(EXTRALIBDIRS))
 LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
@@ -276,7 +273,6 @@ LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 # Type: avrdude -c ?
 # to get a full listing.
 #
-
 ifeq ($(MCU),atmega328p) 
 AVRDUDE_PROGRAMMER = arduino
 AVRDUDE_BAUD = -b 57600 -D
@@ -284,19 +280,19 @@ else
 AVRDUDE_PROGRAMMER = wiring
 AVRDUDE_BAUD = -b 115200 -D
 endif 
+
+
 # com1 = serial port. Use lpt1 to connect to parallel port.
 AVRDUDE_PORT = /dev/ttyUSB0    # programmer connected to serial device
 
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 #AVRDUDE_WRITE_EEPROM = -U eeprom:w:$(TARGET).eep
 
-#AVRDUDE_WRITE_FUSE = -u -U lfuse:w:0xcf:m -U hfuse:w:0xc9:m
-AVRDUDE_WRITE_FUSE = 
 
 # Uncomment the following if you want avrdude's erase cycle counter.
 # Note that this counter needs to be initialized first using -Yn,
 # see avrdude manual.
-AVRDUDE_ERASE_COUNTER =
+#AVRDUDE_ERASE_COUNTER = -y
 
 # Uncomment the following if you do /not/ wish a verification to be
 # performed after programming the device.
@@ -457,7 +453,7 @@ gccversion :
 
 # Program the device.  
 program: $(TARGET).hex $(TARGET).eep
-	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH) $(AVRDUDE_WRITE_EEPROM) $(AVRDUDE_WRITE_FUSE)
+	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH) $(AVRDUDE_WRITE_EEPROM)
 
 
 # Generate avr-gdb config/init file which does the following:
@@ -523,7 +519,7 @@ extcoff: $(TARGET).elf
 	@echo
 	@echo $(MSG_EEPROM) $@
 	-$(OBJCOPY) -j .eeprom --set-section-flags=.eeprom="alloc,load" \
-	--change-section-lma .eeprom=2 --no-change-warnings -O $(FORMAT) $< $@ || exit 0
+	--change-section-lma .eeprom=0 --no-change-warnings -O $(FORMAT) $< $@ || exit 0
 
 # Create extended listing file from ELF output file.
 %.lss: %.elf
@@ -626,5 +622,3 @@ $(shell mkdir $(OBJDIR) 2>/dev/null)
 .PHONY : all begin finish end sizebefore sizeafter gccversion \
 build elf hex eep lss sym coff extcoff \
 clean clean_list program debug gdb-config
-
-

@@ -1,4 +1,4 @@
-*.o[a]
+*.[oad]
 *.elf
 *.lss
 *.sym
@@ -8,3 +8,9 @@
 *.lst
 obj/
 .dep/
+*~
+*.bak
+*.rar
+*.bin
+*.zip
+
